@@ -4,6 +4,8 @@ import vue from '@vitejs/plugin-vue'
 import electron from 'vite-plugin-electron/simple'
 import pkg from './package.json'
 import path from 'node:path'
+import tailwind from "tailwindcss"
+import autoprefixer from "autoprefixer"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
@@ -14,6 +16,11 @@ export default defineConfig(({ command }) => {
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG
 
   return {
+    css: {
+      postcss: {
+        plugins: [tailwind(), autoprefixer()],
+      },
+    },
     plugins: [
       vue(),
       electron({
@@ -63,6 +70,11 @@ export default defineConfig(({ command }) => {
         renderer: {},
       }),
     ],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
     server: process.env.VSCODE_DEBUG && (() => {
       const url = new URL(pkg.debug.env.VITE_DEV_SERVER_URL)
       return {

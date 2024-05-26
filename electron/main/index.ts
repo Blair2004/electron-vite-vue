@@ -1,10 +1,12 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Tray, Menu } from 'electron'
 import { release } from 'node:os'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 globalThis.__filename = fileURLToPath(import.meta.url)
 globalThis.__dirname = dirname(__filename)
+
+import AppMenu from './AppMenu'
 
 // The built directory structure
 //
@@ -44,7 +46,31 @@ const preload = join(__dirname, '../preload/index.mjs')
 const url = process.env.VITE_DEV_SERVER_URL
 const indexHtml = join(process.env.DIST, 'index.html')
 
+let tray;
+
 async function createWindow() {
+
+  tray 			=	new Tray( join( process.env.PUBLIC, 'favicon.ico' ) );
+
+	/**
+	 * let's add some menus to
+	 * the tray icons for managing the app
+	 */
+	const menuContext 	=	Menu.buildFromTemplate([
+		{
+			label: 'Restore Window',
+			type: 'normal',
+			click: () => win.show()
+		}, {
+			label: 'Close And Quit',
+			type: 'normal',
+			click: () => app.quit()
+		}
+	]);
+
+	tray.setToolTip( 'Nexo Print Server' );
+	tray.setContextMenu( menuContext );
+
   win = new BrowserWindow({
     title: 'Main window',
     icon: join(process.env.VITE_PUBLIC, 'favicon.ico'),
@@ -59,6 +85,18 @@ async function createWindow() {
     },
   })
 
+  // let's check if we're on development mode
+	if ( typeof process.env.VITE_DEV_SERVER_URL !== 'string' ) {
+		win.setSize(850,600);
+		win.setMaximumSize(850,600);
+		win.setMinimumSize(850,600);		
+	}
+
+  /**
+	 * this defines the about 
+	 */
+	new AppMenu({ preload, win, indexHtml, url });
+
   if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
     win.loadURL(url)
     // Open devTool if the app is not packaged
@@ -69,7 +107,18 @@ async function createWindow() {
 
   // Test actively push message to the Electron-Renderer
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', new Date().toLocaleString())
+    win?.webContents.send('main-process-message', new Date().toLocaleString());
+
+    // setInterval( () => {
+    //   console.log( 'Should have sent' );
+    //   win.webContents.send( 'server-down', {
+    //     type: 'toast',
+    //     data: {
+    //       title: 'Hello World',
+    //       description: 'This is comming from the server'
+    //     }
+    //   })
+    // }, 5000 );
   })
 
   // Make all links open with the browser, not with the application
@@ -77,6 +126,11 @@ async function createWindow() {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
+
+  win.on('minimize', function (event) {
+		event.preventDefault();
+		win.hide();
+	});
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 

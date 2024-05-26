@@ -5,7 +5,7 @@ import Authenticate from './pages/Authenticate.vue';
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'Authenticate',
     component: Authenticate
   }, {
     path: '/select-license',
@@ -13,20 +13,20 @@ const routes = [
     component: SelectLicense
   }, {
     path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('./pages/Dashboard.vue')
+    name: 'Dashboard.Home',
+    component: () => import('./pages/Dashboard/Home.vue')
   }, {
     path: '/dashboard/log',
-    name: 'Log',
-    component: () => import('./pages/Log.vue')
+    name: 'Dashboard.Log',
+    component: () => import('./pages/Dashboard/Log.vue')
   }, {
     path: '/dashboard/printers',
-    name: 'Printers',
-    component: () => import('./pages/Printers.vue')
+    name: 'Dashboard.Printers',
+    component: () => import('./pages/Dashboard/Printers.vue')
   }, {
     path: '/dashboard/settings',
-    name: 'Settings',
-    component: () => import('./pages/Settings.vue')
+    name: 'Dashboard.Settings',
+    component: () => import('./pages/Dashboard/Settings.vue')
   }
 ]
 
