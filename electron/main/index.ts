@@ -1,12 +1,14 @@
 import { app, BrowserWindow, shell, ipcMain, Tray, Menu } from 'electron'
 import { release } from 'node:os'
-import { join, dirname } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 globalThis.__filename = fileURLToPath(import.meta.url)
 globalThis.__dirname = dirname(__filename)
 
 import AppMenu from './AppMenu'
+import { BackAndForth } from './back-and-forth'
+import { Authentication } from './services/Authentication'
 
 // The built directory structure
 //
@@ -23,6 +25,14 @@ process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
 process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL
   ? join(process.env.DIST_ELECTRON, '../public')
   : process.env.DIST
+
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('nps', process.execPath, [resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('nps')
+}
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -131,6 +141,8 @@ async function createWindow() {
 		event.preventDefault();
 		win.hide();
 	});
+
+  new BackAndForth( win.webContents );
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
@@ -139,6 +151,21 @@ app.whenReady().then(createWindow)
 app.on('window-all-closed', () => {
   win = null
   if (process.platform !== 'darwin') app.quit()
+})
+
+app.on('second-instance', async (event, commandLine, workingDirectory) => {
+	if (win) {
+		// Focus on the main window if the user tried to open another
+		if (win.isMinimized()) win.restore()
+		win.focus()
+	}
+
+	const data = await (new Authentication).saveCode(commandLine.pop().slice(0, -1) );
+
+  win.webContents.send( 'server-down', {
+    type: 'authentication-response',
+    data
+  });
 })
 
 app.on('second-instance', () => {

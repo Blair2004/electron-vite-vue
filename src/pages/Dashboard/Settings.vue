@@ -3,6 +3,7 @@ import DashboardLayout from '@/layout/DashboardLayout.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import General from './Settings/General.vue';
 import CloudPrint from './Settings/CloudPrint.vue';
+import About from "./Settings/About.vue";
 
 
 </script>
@@ -12,7 +13,7 @@ import CloudPrint from './Settings/CloudPrint.vue';
             <h1 class="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-5xl">Settings</h1>
             <small>Configure how Nexo Print Server works.</small>
         </div>
-        <div class="p-4">
+        <div class="px-4 pb-4">
             <Tabs default-value="general">
                 <TabsList>
                     <TabsTrigger value="general">
@@ -32,7 +33,7 @@ import CloudPrint from './Settings/CloudPrint.vue';
                     <CloudPrint/>
                 </TabsContent>
                 <TabsContent value="about">
-                    Change your password here.
+                    <About/>
                 </TabsContent>
             </Tabs>
         </div>

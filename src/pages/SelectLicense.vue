@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -17,22 +17,85 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 
-import { ReloadIcon } from "@radix-icons/vue";
-
+import { InfoCircledIcon, ReloadIcon } from "@radix-icons/vue";
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'vue-router';
+import { Ref, onMounted, ref } from 'vue';
+import { PieChartIcon } from "@radix-icons/vue";
+import { IpcRenderer } from 'electron';
+import { AsyncResponse } from '@/interfaces/AsyncResponse';
+import toast from '@/lib/toast';
+import Alert from '@/components/ui/alert/Alert.vue';
+import AlertTitle from '@/components/ui/alert/AlertTitle.vue';
+import AlertDescription from '@/components/ui/alert/AlertDescription.vue';
+
+declare const ipcRenderer: IpcRenderer;
 
 const router    =   useRouter();
+const hasLoadedLicenses     =   ref( false );
+const licenses  =   ref([]);
+const isLoadingLicense = ref( false );
+const isAssigingLicense = ref( false );
+const selectedLicenseId: Ref<string | null> = ref( null );
 
-function assignLicense() {
-    return router.push( '/dashboard' );
+async function assignLicense() {
+    isAssigingLicense.value = true;
+    const response: AsyncResponse  =   await ipcRenderer.invoke( 'select-license', { license: selectedLicenseId.value } );
+
+    /**
+     * We need to reload the options as this will be used
+     * on the next middleware
+     */
+    await ipcRenderer.invoke( 'load-options' );
+
+    /**
+     * We're stopping the spinner
+     */
+    isAssigingLicense.value = false;
+
+    if ( response.status === 'error' ) {
+        return toast.error( 'An Error Occured', response.message );
+    } else {
+        /**
+         * All's good we might navigate to the dashboard
+         */
+        return router.push( '/dashboard' );
+    }
 }
 
-function enableDemo() {
-    return router.push( '/dashboard' );
+async function enableDemo() {
+    /**
+     * no response is expected. We do use await to make sure
+     * the option "app_status" is set to demo.
+     */
+    await ipcRenderer.invoke( 'start-demo' );
 }
+
+async function loadLicenses() {
+    isLoadingLicense.value = true;
+    const response = (<AsyncResponse>await ipcRenderer.invoke('user-licenses'));
+    isLoadingLicense.value = false;
+
+    if ( response.status === 'error' ) {
+        toast.error( 'An Error Occured', 'We\'re unable to fetch your licenses. If the issue persist contact the support.' );
+        return;
+    }
+
+    if ( response.status === 'success' && response.data.length === 0 ) {
+        toast.message( 'No License Found', 'You can start using the free version of Nexo Print Server right away.' );
+    }
+
+    console.log( response.data );
+
+    hasLoadedLicenses.value = true;
+    licenses.value = response.data;
+}
+
+onMounted( async() => {
+    loadLicenses();
+});
 
 </script>
 <template>
@@ -50,32 +113,45 @@ function enableDemo() {
                     Now that we're able to connect to your account, you need to assign the license that you want to use with Nexo Print Server.
                 </div>
                 <br>
-                <div class="text-sm text-justify">
-                    Alternatively, you can start using a limited version of Nexo Print Server right away. Note that you can upgrade later from the settings.
-                </div>
-                <br>
+                <Alert v-if="licenses.length == 0 && hasLoadedLicenses">
+                    <InfoCircledIcon class="h-4 w-4" />
+                    <AlertTitle>No License Were Found!</AlertTitle>
+                    <AlertDescription>
+                    It appears that you don't have any license available on your account. You can start using the free version of Nexo Print Server right away. 
+                    <br>
+                    <br>
+                    If you believe there is a mistake, please contact the support.
+                    </AlertDescription>
+                </Alert>
                 <div>
                     <div class="mb-2">
-                        <Select>
+                        <Select v-model="selectedLicenseId" v-if="licenses.length > 0 && hasLoadedLicenses">
                             <SelectTrigger>
-                                <SelectValue placeholder="Select a fruit" />
+                                <SelectValue placeholder="Assign A License" />
                                 </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>Fruits</SelectLabel>
-                                    <SelectItem value="apple">
-                                    Apple
+                                    <SelectLabel>Assign A License</SelectLabel>
+                                    <SelectItem v-for="license of licenses" :value="license.id.toString()">
+                                    {{ license.name }} ({{ license.supported_until }})<br>
+                                    <small>{{ license.license }}</small>
                                     </SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
                         <br>
-                        <Button @click="assignLicense()" class="mr-2">
-                            Select License
-                        </Button>
-                        <Button @click="enableDemo()" class="mr-2">
-                            Use Free Version
-                        </Button>                        
+                        <div class="flex">
+                            <Button v-if="licenses.length > 0 && hasLoadedLicenses" @click="assignLicense()" class="mr-2">
+                                <PieChartIcon v-if="isAssigingLicense" class="animate-spin mr-2"/>
+                                Select License
+                            </Button>
+                            <Button @click="enableDemo()" class="mr-2">
+                                Start Demo
+                            </Button>                        
+                            <Button @click="loadLicenses()" class="mr-2">
+                                <ReloadIcon :class="isLoadingLicense ? 'animate-spin' : ''" class="mr-2"/> Try Again
+                            </Button>                        
+                        </div>
                     </div>
                 </div>
             </CardContent>

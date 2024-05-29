@@ -2,17 +2,27 @@
     <Toaster />
 </template>
 <script setup lang="ts">
-import Toaster from '@/components/ui/toast/Toaster.vue';
-import { useToast } from '@/components/ui/toast/use-toast';
+import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'vue-sonner';
 import { State } from '@/interfaces/State';
 import { store } from "@/store";
-import { ref, onUnmounted } from 'vue';
-
-const { toast }     =   useToast();
+import { onUnmounted } from 'vue';
 
 const subscriber    =   store.observable.subscribe( ( value: State ) => {
     if ( value.type === 'toast' ) {
-        toast( value.data );
+        switch( value.data.type ) {
+            case 'error':
+                toast.error( value.data.title, value.data );
+                break;
+            case 'success':
+                toast.success( value.data.title, value.data );
+                break;
+            case 'warning':
+                toast.warning( value.data.title, value.data );
+                break;
+            default:
+                toast( value.data.title, value.data );
+        }
     }
 });
 

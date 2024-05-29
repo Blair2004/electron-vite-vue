@@ -2,7 +2,7 @@ import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
 
-class Options {
+export class Options {
     private options: Record<string, unknown>;
     private filePath: string;
 
@@ -16,10 +16,31 @@ class Options {
         }
         // Set the file path
         this.filePath = path.join(dirPath, 'options.json');
+        this.loadOptions();
+    }
+
+    saveFromObject( options: Record<string, unknown> ) {
+        for( let key in options ) {
+            this.options[ key ] = options[ key ];
+        }
+        this.saveOptions();
+    }
+
+    getAll() {
+        this.loadOptions();
+        
+        return this.options;
     }
 
     set( key: string, value: any ) {
         this.options[ key ] = value;
+        this.saveOptions();
+    }
+
+    deleteKeys( keys: string[] ) {
+        for( let key of keys ) {
+            delete this.options[ key ];
+        }
         this.saveOptions();
     }
 
@@ -29,14 +50,15 @@ class Options {
     }
 
     get( key: string ) {
+        this.loadOptions();
         return this.options[ key ];
     }
 
-    saveOptions() {
+    private saveOptions() {
         fs.writeFileSync(this.filePath, JSON.stringify(this.options, null, 2));
     }
 
-    loadOptions() {
+    private loadOptions() {
         if (fs.existsSync(this.filePath)) {
             const optionsData = fs.readFileSync(this.filePath, 'utf-8');
             this.options = JSON.parse(optionsData);
