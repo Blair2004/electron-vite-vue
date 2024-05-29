@@ -6,9 +6,11 @@ export class AuthenticateMiddleware {
     handle( next: any ) {
         return new Promise( async ( resolve, reject ) => {
             if ( (<any>window).options.access_token === undefined ) {
-                next(); // proceed as it's Authentication middleware
+                next();
+                resolve( false );
             } else {
                 next('/select-license');
+                resolve( false );
             }
         });
     }

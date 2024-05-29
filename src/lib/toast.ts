@@ -12,14 +12,15 @@ class Toast {
             options.action  =   h( ToastAction, {
                 altText: actionLabel
             }, {
-                default: () => callback()
+                default: () => {
+                    callback();
+                }
             });
         }
 
-        store.next(<State>{
-            type: "toast",
-            data: <ToastInterface>{ title, description, ...options }
-        })
+        store.dispatch( ( state: State ) => {
+            state.toast = <ToastInterface>{ title, description, ...options }
+        });
     }
 
     error( title: string, description: string, callback = () => {}, actionLabel?: string ) {
@@ -31,14 +32,15 @@ class Toast {
             options.action  =   h( ToastAction, {
                 altText: actionLabel
             }, {
-                default: () => callback()
+                default: () => {
+                    callback();
+                }
             });
         }
 
-        store.next(<State>{
-            type: "toast",
-            data: <ToastInterface>{ title, description, ...options }
-        })
+        store.dispatch( ( state: State ) => {
+            state.toast = <ToastInterface>{ title, description, ...options }
+        });
     }
 }
 

@@ -12,8 +12,6 @@
 import Field from '@/components/Field.vue';
 import { Button } from '@/components/ui/button';
 import { Field as FieldInterface } from '@/interfaces/Field';
-import { store } from '@/store';
-import { onUnmounted } from 'vue';
 import Toast from "@/lib/toast";
 
 const fields: FieldInterface[]    =   [
@@ -50,8 +48,6 @@ function saveSettings() {
             field.value = false;
         }
     });
-
-    console.log( fields );
 
     Toast.message( 'Operation Successful', 'The settings were saved!' );
 }

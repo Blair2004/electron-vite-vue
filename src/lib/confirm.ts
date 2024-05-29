@@ -1,14 +1,17 @@
+import { State } from "@/interfaces/State";
 import { store } from "@/store";
 
 export function confirm( title: string, message: string, onConfirm: Function ) {
-    store.next({
-        type: 'dialog',
-        data: {
+    store.dispatch( ( state: State ) => {
+        state.dialog = {
             type: 'confirm',
             title,
             message,
             onConfirm: () => {
-                store.next({ type: 'dialog', data: false })
+                store.dispatch( ( state: State ) => {
+                    state.dialog    =   {};
+                });
+                
                 onConfirm();
             }
         }

@@ -32,9 +32,9 @@ const verifyToken = async () => {
         return toast.error( 'Invalid Form', 'Please provide a valid App ID and App Key to proceed.' );
     }
 
-    store.next( <State>{
-        type: 'save-options',
-        data: { client_id: client_id.value, client_secret: client_secret.value }
+    store.dispatch( ( state: any ) => {
+        state.server_up = 'save-options';
+        state.server_data = { client_id: client_id.value, client_secret: client_secret.value };
     });
     
     isLoading.value = true;

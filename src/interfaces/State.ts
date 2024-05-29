@@ -1,4 +1,9 @@
 export interface State {
-    type: 'toast' | 'server-up' | 'server-down' | 'save-options' | 'load-options' | 'store-options' | 'authentication-response' | 'dialog',
-    data: any
+    server_up: 'save-options' | 'load-options' | 'delete-options' | false,
+    server_data: any,
+    dialog: any,
+    toast: any,
+    options: {
+        [key: string]: any
+    }
 }

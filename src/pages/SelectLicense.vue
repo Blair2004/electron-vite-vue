@@ -41,6 +41,11 @@ const isAssigingLicense = ref( false );
 const selectedLicenseId: Ref<string | null> = ref( null );
 
 async function assignLicense() {
+
+    if ( selectedLicenseId.value === null ) {
+        return toast.error( 'No License Selected', 'Please select a license to continue.' );
+    }
+
     isAssigingLicense.value = true;
     const response: AsyncResponse  =   await ipcRenderer.invoke( 'select-license', { license: selectedLicenseId.value } );
 

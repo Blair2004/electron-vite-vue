@@ -31,7 +31,6 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '../ui/button';
-import { Ref, onUnmounted, ref } from 'vue';
 import { store } from '@/store';
 import { State } from '@/interfaces/State';
 import { Dialog as DialogInterface } from "@/interfaces/Dialog";
@@ -40,10 +39,8 @@ defineProps<{
 }>();
 
 function closeDialog() {
-    store.next({
-        type: 'dialog',
-        data: false
+    store.dispatch( ( state: State ) => {
+        state.dialog = {};
     });
 }
-
 </script>

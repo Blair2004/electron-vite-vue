@@ -281,17 +281,10 @@ export class Authentication
                         data: result.data
                     });                    
                 }).catch( error => {
-                    if ( error.response === undefined ) {
-                        return resolve({
-                            status: 'error',
-                            code: 'not_connected',
-                            message: `Unable to reach the host`
-                        });
-                    }
-
-                    resolve({
+                    console.log( error );
+                    reject({
                         status: 'error',
-                        message: error.response.data.message,
+                        message: error.response.data,
                     });
                 })
         })

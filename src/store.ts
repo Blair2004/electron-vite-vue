@@ -1,13 +1,58 @@
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { BehaviorSubject, Observable, Subject, distinctUntilChanged, map, scan, shareReplay } from "rxjs";
+import { State } from "./interfaces/State";
+import { produce } from "immer";
 
-class ObservableService {
-    private subject = new BehaviorSubject({});
+class Store {
 
-    public observable: Observable<any> = this.subject.asObservable();
+    private _state$: BehaviorSubject<any>;
+    private _history$: BehaviorSubject<any>;
+    private _action$: Subject<any>;
+    private _initialState: any;
 
-    public next( value: any ): void {
-        this.subject.next( value );
+    constructor(initialState: any) {
+        this._initialState = initialState;
+        this._state$ = new BehaviorSubject(initialState);
+        this._history$ = new BehaviorSubject([initialState]);
+        this._action$ = new Subject();
+
+        this._action$
+            .pipe(
+                scan((state, reducer) => reducer(state), this._initialState),
+                shareReplay(1)
+            )
+            .subscribe(this._state$);
+
+        this._state$
+            .pipe(
+                scan((history, state) => [...history, state], [initialState]),
+                shareReplay(1)
+            )
+            .subscribe(this._history$);
     }
+
+    getState$() {
+        return this._state$.asObservable();
+    }
+
+    getHistory$() {
+        return this._history$.asObservable();
+    }
+
+    dispatch(updater: Function) {
+        this._action$.next((state: State) => produce(state, <any>updater));
+    }
+
+    /**
+     * to listen specific state change.
+     * @param selector callback
+     * @returns Observable
+     */
+    select(selector: (value: any, index: number) => any) {
+        return this._state$.pipe(
+          map(selector),
+          distinctUntilChanged()
+        );
+      }
 }
 
-export const store = new ObservableService();
+export const store = new Store({});

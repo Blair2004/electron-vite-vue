@@ -1,6 +1,6 @@
 <template>
     <Dialog :open="shouldOpenDialog()">
-        <DialogContent @pointer-down-outside="closePopup()" class="sm:max-w-[425px]">
+        <DialogContent @pointer-down-outside="closePopup()" @escape-key-down="closePopup()" class="sm:max-w-[425px]">
             <Confirm v-if="dialog.type === 'confirm'" :dialog="dialog"/>
         </DialogContent>
     </Dialog>    
@@ -18,24 +18,22 @@ import Confirm from './Confirm.vue';
 
 const dialog: Ref<DialogInterface> = ref({});
 
-const subscription = store.observable.subscribe( ( state: State ) => {
-    if ( state.type === 'dialog' ) {
-        dialog.value = <DialogInterface>state.data;
-    }
+const subscriber = store.select( ( state: State ) => state.dialog ).subscribe( ( dialogState ) => {
+    dialog.value   =   dialogState;
 });
+
 
 /**
  * Methods Section
  * ----------------
  */
 function shouldOpenDialog(): boolean {
-    return dialog.value.type !== undefined;
+    return dialog.value && dialog.value.type !== undefined;
 } 
 
 function closePopup() {
-    store.next({
-        type: 'dialog',
-        data: false
+    store.dispatch( ( state: any ) => {
+        state.dialog = {};
     });
 }
 
@@ -44,6 +42,6 @@ function closePopup() {
  * ----------------
  */
 onUnmounted( () => {
-    subscription.unsubscribe();
+    subscriber.unsubscribe();
 });
 </script>

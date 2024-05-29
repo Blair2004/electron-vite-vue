@@ -3,8 +3,8 @@ import SelectLicense from './pages/SelectLicense.vue';
 import Authenticate from './pages/Authenticate.vue';
 import { AuthenticateMiddleware } from './middleware/AuthenticateMiddleware';
 import { IpcRenderer } from 'electron';
-import { CheckCredentialsMiddleware } from './middleware/CheckCredentialsMiddleware';
-import { CheckAppStatusMiddleware } from './middleware/CheckAppStatusMiddleware';
+import { CanAccessSetupMiddleware } from './middleware/CanAccessSetupMiddleware';
+import { CanAccessDashboardMiddleware } from './middleware/CanAccessDashboardMiddleware';
 
 declare const ipcRenderer: IpcRenderer;
 
@@ -18,27 +18,27 @@ const routes = [
     path: '/select-license',
     name: 'SelectLicense',
     component: SelectLicense,
-    middlewares: [ new CheckCredentialsMiddleware ]
+    middlewares: [ new CanAccessSetupMiddleware ]
   }, {
     path: '/dashboard',
     name: 'Dashboard.Home',
     component: () => import('./pages/Dashboard/Home.vue'),
-    middlewares: [ new CheckAppStatusMiddleware ]
+    middlewares: [ new CanAccessDashboardMiddleware ]
   }, {
     path: '/dashboard/log',
     name: 'Dashboard.Log',
     component: () => import('./pages/Dashboard/Log.vue'),
-    middlewares: [ new CheckAppStatusMiddleware ]
+    middlewares: [ new CanAccessDashboardMiddleware ]
   }, {
     path: '/dashboard/printers',
     name: 'Dashboard.Printers',
     component: () => import('./pages/Dashboard/Printers.vue'),
-    middlewares: [ new CheckAppStatusMiddleware ]
+    middlewares: [ new CanAccessDashboardMiddleware ]
   }, {
     path: '/dashboard/settings',
     name: 'Dashboard.Settings',
     component: () => import('./pages/Dashboard/Settings.vue'),
-    middlewares: [ new CheckAppStatusMiddleware ]
+    middlewares: [ new CanAccessDashboardMiddleware ]
   }
 ]
 

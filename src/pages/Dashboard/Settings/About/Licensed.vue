@@ -27,14 +27,16 @@ declare const ipcRenderer: IpcRenderer
 
 const version = ref('');
 const options: Ref<Options> = ref({});
-const router    =   useRouter();
+const router = useRouter();
 
-const subscription  =   store.observable.subscribe( ( state: State ) => {
-    if ( state.type === 'store-options' ) {
-        options.value = state.data;
-    }
+const subscription = store.getState$().subscribe( (state: State) => {
+    options.value = state.options;
 });
 
+/**
+ * Method Section
+ * ---------------
+ */
 function disconnectLicense() {
     return confirm(
         'Confirm Your Action',
@@ -43,8 +45,13 @@ function disconnectLicense() {
             try {
                 const response = await ipcRenderer.invoke( 'disconnect-license' );
                 if ( response.status === 'success' ) {
-                    toast.message( 'License disconnected', 'Your license has been successfully disconnected' );
+                    /**
+                     * This will be triggered after all store.dispatch call.
+                     */
+                    toast.message( 'License disconnected', response.message );
+                    
                     router.push('/');
+
                     return;
                 } else {
                     toast.error( 'An error occured', response.message );

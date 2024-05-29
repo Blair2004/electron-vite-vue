@@ -3,7 +3,7 @@ import { Subscription } from "rxjs";
 
 declare const ipcRenderer: IpcRenderer;
 
-export class CheckAppStatusMiddleware {
+export class CanAccessDashboardMiddleware {
     observer?: Subscription;
 
     handle( next: any ) {
@@ -15,10 +15,10 @@ export class CheckAppStatusMiddleware {
                  */
                 await ipcRenderer.invoke( 'delete-options', [ 'selected_license' ]);
                 next('/select-license');
-                return false;
+                resolve( false );
             } else {
                 next();
-                return false;
+                resolve( false );
             }
         });
     }
