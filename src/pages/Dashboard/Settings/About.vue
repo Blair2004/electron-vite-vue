@@ -1,4 +1,5 @@
 <template>
+    {{ options }}
     <Demo v-if="options.app_status === 'demo'"/>
     <Licensed v-else-if="options.app_status === 'licensed'"/>
 </template>
@@ -12,8 +13,10 @@ import { Options } from '@/interfaces/Options';
 
 const options: Ref<Options>   =   ref({});
 const subscriber = store.observable.subscribe( (state: State ) => {
+    console.log({ state })
     if ( state.type === 'store-options' ) {
         options.value = state.data;
+        console.log({ options })
     }
 });
 
@@ -22,5 +25,6 @@ const subscriber = store.observable.subscribe( (state: State ) => {
  */
 onUnmounted( () => {
     subscriber.unsubscribe();
+    console.log({ subscriber })
 });
 </script>

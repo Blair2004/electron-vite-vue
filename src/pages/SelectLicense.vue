@@ -87,8 +87,6 @@ async function loadLicenses() {
         toast.message( 'No License Found', 'You can start using the free version of Nexo Print Server right away.' );
     }
 
-    console.log( response.data );
-
     hasLoadedLicenses.value = true;
     licenses.value = response.data;
 }
@@ -149,7 +147,7 @@ onMounted( async() => {
                                 Start Demo
                             </Button>                        
                             <Button @click="loadLicenses()" class="mr-2">
-                                <ReloadIcon :class="isLoadingLicense ? 'animate-spin' : ''" class="mr-2"/> Try Again
+                                <ReloadIcon :class="isLoadingLicense ? 'animate-spin' : ''" class="mr-2"/> Reload
                             </Button>                        
                         </div>
                     </div>
