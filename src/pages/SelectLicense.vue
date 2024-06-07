@@ -76,6 +76,8 @@ async function enableDemo() {
      * the option "app_status" is set to demo.
      */
     await ipcRenderer.invoke( 'start-demo' );
+
+    return router.push( '/dashboard' );
 }
 
 async function loadLicenses() {
@@ -104,7 +106,7 @@ onMounted( async() => {
 <template>
     <div class="w-full p-4 flex flex-col items-center bg-background">
         <div class="mx-auto w-56 flex items-center justify-center">
-            <div class="h-32">LOGO</div>
+            <img src="@/assets/images/logo.png" alt="Nexo Print Server" class="p-10">
         </div>
         <Card class="w-full md:w-2/3">
             <CardHeader>

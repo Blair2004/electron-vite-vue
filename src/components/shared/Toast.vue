@@ -20,7 +20,6 @@ function closeToast() {
 
 const subscriber = store.select( ( state: State ) => state.toast ).subscribe( ( toastState ) => {
     if ( toastState && Object.keys( toastState ).length > 0 ) {
-        console.log( JSON.stringify( toastState ) );
         switch( toastState.type ) {
             case 'error':
                 toast.error( toastState.title, { ...toastState, ...{

@@ -1,7 +1,7 @@
 <template>
     <div class="-mx-2 flex flex-col md:flex-row">
         <div class="px-2" v-for="sectionFields of totalParts">
-            <Field :field="field" v-for="field of sectionFields"/>
+            <Field :field="field" v-for="field of filterFields( sectionFields )"/>
         </div>
     </div>
     <div class="flex justify-end">
@@ -12,8 +12,21 @@
 import Field from '@/components/Field.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Field as FieldInterface } from '@/interfaces/Field';
+import { Options } from '@/interfaces/Options';
+import { State } from '@/interfaces/State';
+import toast from '@/lib/toast';
+import { store } from '@/store';
+import { IpcRenderer, ipcMain } from 'electron';
+import { Ref, onUnmounted, ref } from 'vue';
 
-const fields: FieldInterface[]    =   [
+declare const ipcRenderer: IpcRenderer;
+
+const options: Ref<Options>     =   ref({});
+const subscription = store.select( ( state:State ) => state.options ).subscribe( ( storeOptions: Options ) => {
+    options.value = storeOptions;
+});
+
+const fields: Ref<FieldInterface[]>    =   ref([
     {
         type: "number",
         label: "Default Port",
@@ -27,10 +40,10 @@ const fields: FieldInterface[]    =   [
         options: [
             {
                 label: "Yes",
-                value: "yes",
+                value: true,
             }, {
                 label: "No", 
-                value: "no"
+                value: false
             }
         ]
     }, {
@@ -41,10 +54,10 @@ const fields: FieldInterface[]    =   [
         options: [
             {
                 label: "Yes",
-                value: "yes",
+                value: true,
             }, {
                 label: "No", 
-                value: "no"
+                value: false
             }
         ]
     }, {
@@ -55,10 +68,10 @@ const fields: FieldInterface[]    =   [
         options: [
             {
                 label: "Yes",
-                value: "yes",
+                value: true,
             }, {
                 label: "No", 
-                value: "no"
+                value: false
             }
         ]
     }, {
@@ -69,22 +82,21 @@ const fields: FieldInterface[]    =   [
         options: [
             {
                 label: "Yes",
-                value: "yes",
+                value: true,
             }, {
                 label: "No", 
-                value: "no"
+                value: false
             }
         ]
     }
-]
+]);
 
-const totalParts     =   sliceArray( fields, 2 );
+const totalParts     =   sliceArray( fields.value, 2 );
 
 /**
- * create two slices of the array
- * fields
+ * Methods
+ * --------------
  */
-
 function sliceArray( array: any[], numSlices: number ) {
     const sliceSize = Math.ceil(array.length / numSlices);
     const slices = [];
@@ -96,15 +108,50 @@ function sliceArray( array: any[], numSlices: number ) {
     return slices;
 }
 
-function saveSettings() {
+function filterFields( fields: FieldInterface[] ) {
+    return fields.map( field => {
+        if ( options.value.app_status === 'demo' && [ 
+            'run_on_windows_startup',
+            'cloud_print_enabled',
+            'autostart'
+        ].includes( field.name ) ) {
+            field.disabled = true;
+        }
+
+        field.value = (<any>options.value)[field.name];
+
+        return field;
+    });
+}
+
+async function saveSettings() {
     // loops fields, and for switch field with no "value"
     // attribute, we'll set the value to "false" which means disabled
-    fields.forEach( field => {
+    fields.value.forEach( field => {
         if ( field.type === "switch" && field.value === undefined ) {
             field.value = false;
         }
     });
 
-    console.log( fields );
+    const data: {[key: string]: any}  =   {}
+    
+    fields.value.forEach( field => {
+        data[field.name] = field.value;
+    });
+
+    try {
+        const response = await ipcRenderer.invoke( 'save-options', data );
+        toast.message( 'Operation Successful', response.message );
+    } catch( exception ) {
+        toast.error( 'Operation Failed', 'Unable to save the settings. If the issue persist, please contact the support.' );
+    }
 }
+
+/**
+ * Hooks
+ * --------------------
+ */
+onUnmounted( () => {
+    subscription.unsubscribe();
+});
 </script>

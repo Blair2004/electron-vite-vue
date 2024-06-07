@@ -44,6 +44,20 @@ export class Options {
         this.saveOptions();
     }
 
+    deleleteAllExcept( keys: string[] ) {
+        for( let key in this.options ) {
+            if ( ! keys.includes( key ) ) {
+                delete this.options[ key ];
+            }
+        }
+        this.saveOptions();
+    }
+
+    deleteAll() {
+        this.options = {};
+        this.saveOptions();
+    }
+
     delete( key: string ) {
         delete this.options[ key ];
         this.saveOptions();

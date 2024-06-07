@@ -8,6 +8,7 @@ export class CanAccessDashboardMiddleware {
 
     handle( next: any ) {
         return new Promise( async ( resolve, reject ) => {
+            console.log( (<any>window).options.app_status );
             if ( (<any>window).options.app_status === undefined ) {
                 /**
                  * for some reason, the app doesn't have the "app_status" 

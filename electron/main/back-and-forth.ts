@@ -2,6 +2,8 @@ import { app, ipcMain } from "electron";
 import { Options } from "./services/Options";
 import { Authentication } from "./services/Authentication";
 import { Reset } from "./Reset";
+import { data } from "autoprefixer";
+import { PrinterService } from "./services/PrinterService";
 
 
 export class BackAndForth {
@@ -13,12 +15,17 @@ export class BackAndForth {
          * When the main is instructed to store options, it stores
          * the data and instrcut therenderer to keep new options.
          */
-        ipcMain.on( 'save-options', ( event, data ) => {
+        ipcMain.handle( 'save-options', ( event, data ) => {
             for( let key in data ) {
                 this.options.set( key, data[ key ] );
             }
 
             this.loadAndStoreOptions();
+
+            return {
+                status: 'success',
+                message: 'The options were successfully saved.'
+            };
         });
 
         /**
@@ -30,6 +37,15 @@ export class BackAndForth {
                 this.options.delete( key );
             }
 
+            return this.loadAndStoreOptions();
+        });
+
+        /**
+         * Sometime, we might want to delete all options
+         * except some options
+         */
+        ipcMain.handle( 'delete-except', ( event, data ) => {
+            this.options.deleleteAllExcept( data );
             return this.loadAndStoreOptions();
         });
 
@@ -97,6 +113,8 @@ export class BackAndForth {
 
                 this.options.set( 'selected_license', data.license );
                 this.options.set( 'app_status', 'licensed' );
+                this.options.set( 'server_port', 3236 );
+                this.options.set( 'ssl_enabled', true );
 
                 return {
                     status: 'success',
@@ -173,6 +191,13 @@ export class BackAndForth {
          */
         ipcMain.handle( 'start-demo', async( event, data ) => {
             this.options.set( 'app_status', 'demo' );
+            this.options.set( 'server_port', 3236 );
+            this.options.set( 'ssl_enabled', true );
+
+            return {
+                status: 'success',
+                message: 'The demo was successfully started.'
+            }
         });
 
         /**
@@ -192,6 +217,20 @@ export class BackAndForth {
                     message: 'An error occured while retreiving user licenses.'
                 }
             }
+        });
+
+        /**
+         * We'll retreive here the user print setup
+         */
+        ipcMain.handle( 'get-print-setups', async () => {
+            return await ( new Authentication ).getPrintSetups();
+        });
+
+        /**
+         * This will provide the available printers.
+         */
+        ipcMain.handle( 'get-printers', async () => {
+            return PrinterService.getPrinters();
         });
     }
 

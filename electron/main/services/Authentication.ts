@@ -270,6 +270,17 @@ export class Authentication
         })
     }
 
+    getPrintSetups() {
+        return new Promise( async ( resolve, reject ) => {
+            try {
+                const result = await this.http().get( 'api/user/setups' )
+                resolve( result.data );
+            } catch( exception ) {
+                reject( exception );
+            }
+        })
+    }
+
     verifyLicense( license ) {
         return new Promise( ( resolve, reject ) => {            
             this.http().get( `api/user/licenses/${license}` )

@@ -9,4 +9,5 @@ export interface Field {
     description?: string;
     label: string;
     placeholder?: '';
+    disabled?: boolean;
 }
