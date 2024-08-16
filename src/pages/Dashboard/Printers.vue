@@ -8,7 +8,7 @@ const printers:Ref<any[]> =  ref([]);
 
 onMounted( async () => {
     printers.value =    await ipcRenderer.invoke( 'get-printers' );
-    console.log( printers );
+    console.log({ printers });
 })
 </script>
 <template>
