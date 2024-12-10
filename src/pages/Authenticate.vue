@@ -53,11 +53,11 @@ const verifyToken = async () => {
     }, 10000 );
 };
 
-const handleFileChange = (event) => {
+const handleFileChange = (event:any) => {
     const file = event.target.files[0];
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = (e:any) => {
         const contents = e.target.result;
         try {
             const jsonData = JSON.parse(contents);
@@ -89,7 +89,7 @@ const handleFileChange = (event) => {
  * Subscriber to listen to options change
  * this will determine if we can go to the next page or not
  */
-const subscription  =   store.observable.subscribe( async ( state: State ) => {
+const subscription  =   store.getState$().subscribe( async ( state: State ) => {
     /**
      * When the renderer is instructed
      * to store the options.

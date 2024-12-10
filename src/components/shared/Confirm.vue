@@ -8,7 +8,7 @@
     <DialogFooter>
         <div class="flex -mx-2 justify-end">
             <div class="flex px-2">
-                <Button variant="secondary"ype="submit" @click="dialog.onConfirm()">
+                <Button variant="secondary"ype="submit" @click="dialog !== undefined && dialog.onConfirm()">
                     Confirm
                 </Button>
             </div>
@@ -30,12 +30,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+
 import { Button } from '../ui/button';
 import { store } from '@/store';
 import { State } from '@/interfaces/State';
 import { Dialog as DialogInterface } from "@/interfaces/Dialog";
+
+
 defineProps<{
-    dialog: DialogInterface
+    dialog: DialogInterface | any
 }>();
 
 function closeDialog() {

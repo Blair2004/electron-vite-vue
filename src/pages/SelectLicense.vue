@@ -30,15 +30,16 @@ import toast from '@/lib/toast';
 import Alert from '@/components/ui/alert/Alert.vue';
 import AlertTitle from '@/components/ui/alert/AlertTitle.vue';
 import AlertDescription from '@/components/ui/alert/AlertDescription.vue';
+import { License } from '@/interfaces/License';
 
 declare const ipcRenderer: IpcRenderer;
 
 const router    =   useRouter();
 const hasLoadedLicenses     =   ref( false );
-const licenses  =   ref([]);
+const licenses: Ref<License[]>  =   ref([]);
 const isLoadingLicense = ref( false );
 const isAssigingLicense = ref( false );
-const selectedLicenseId: Ref<string | null> = ref( null );
+const selectedLicenseId: Ref<string> = ref( 'null' );
 
 async function assignLicense() {
 

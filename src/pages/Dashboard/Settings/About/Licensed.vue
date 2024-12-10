@@ -57,7 +57,7 @@ function disconnectLicense() {
                     toast.error( 'An error occured', response.message );
                 }
                 
-            } catch( exception ) {
+            } catch( exception: any ) {
                 toast.error( 'An error occured', exception.toString() );
             }
         }
@@ -80,7 +80,7 @@ function forceDisconnect() {
                     toast.error( 'An error occured', response.message );
                 }
                 
-            } catch( exception ) {
+            } catch( exception: any ) {
                 toast.error( 'An error occured', exception.toString() );
             }
         }
